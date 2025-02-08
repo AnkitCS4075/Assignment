@@ -9,7 +9,7 @@ interface EventFiltersProps {
 
 export default function EventFilters({ onFilterChange, filters }: EventFiltersProps) {
   const { fetchEvents } = useEvents();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   const categories = [
     'Conference',
