@@ -65,32 +65,32 @@ export default function EventDetails({ eventId, onClose }: EventDetailsProps) {
     <div className="space-y-6">
       {/* Event Header */}
       <div>
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 whitespace-nowrap">
             {event.category}
           </span>
         </div>
-        <p className="mt-4 text-gray-600">{event.description}</p>
+        <p className="mt-4 text-gray-600 text-left">{event.description}</p>
       </div>
 
       {/* Event Image */}
       {event.image && (
-        <div>
+        <div className="w-full">
           <img
             src={event.image}
             alt={event.title}
-            className="w-full h-64 object-cover rounded-lg"
+            className="w-full h-48 sm:h-64 object-cover rounded-lg"
           />
         </div>
       )}
 
       {/* Event Details */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+        <div className="grid grid-cols-1 gap-6">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Event Details</h3>
-            <dl className="mt-4 space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Event Details</h3>
+            <dl className="space-y-4">
               <div>
                 <dt className="text-sm font-medium text-gray-500">Date & Time</dt>
                 <dd className="mt-1 text-sm text-gray-900">
@@ -112,37 +112,37 @@ export default function EventDetails({ eventId, onClose }: EventDetailsProps) {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col justify-end space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-start">
             {error && (
-              <div className="text-red-600 text-sm">
+              <div className="text-red-600 text-sm w-full sm:w-auto">
                 {error}
               </div>
             )}
             
             {isOrganizer ? (
-              <>
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => {
                     onClose();
                     navigate(`/events/${eventId}/edit`);
                   }}
-                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all duration-200 hover:scale-[1.02]"
+                  className="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all duration-200 hover:scale-[1.02]"
                 >
                   Edit Event
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transform transition-all duration-200 hover:scale-[1.02]"
+                  className="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transform transition-all duration-200 hover:scale-[1.02]"
                 >
                   {isDeleting ? 'Deleting...' : 'Delete Event'}
                 </button>
-              </>
+              </div>
             ) : (
               <button
                 onClick={isAttending ? handleLeave : handleJoin}
                 disabled={isJoining || isLeaving || (!isAttending && isAtCapacity)}
-                className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white
+                className={`w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white
                   ${isAttending
                     ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
                     : isAtCapacity
@@ -161,9 +161,9 @@ export default function EventDetails({ eventId, onClose }: EventDetailsProps) {
       </div>
 
       {/* Attendees List */}
-      <div className="bg-white rounded-lg p-6">
+      <div className="bg-white rounded-lg p-4 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Attendees</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {event.attendees.map((attendee) => (
             <div
               key={attendee._id}
