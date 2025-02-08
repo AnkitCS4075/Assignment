@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EventFilters as FilterTypes } from '../../types/event';
 import { useEvents } from '../../context/EventContext';
 
@@ -10,6 +10,8 @@ interface EventFiltersProps {
 export default function EventFilters({ onFilterChange, filters }: EventFiltersProps) {
   const { fetchEvents } = useEvents();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [localSearchQuery, setLocalSearchQuery] = useState(filters.searchQuery || '');
   
   const categories = [
     'Conference',
@@ -44,18 +46,47 @@ export default function EventFilters({ onFilterChange, filters }: EventFiltersPr
     };
 
     if (name === 'searchQuery') {
-      setTimeout(() => {
+      setLocalSearchQuery(value); // Update local state immediately
+      
+      // Clear any existing timeout
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+
+      // Set new timeout
+      const timeout = setTimeout(() => {
         onFilterChange(updatedFilters);
-      }, 300);
+      }, 1000); // Increased to 1 second for better user experience
+
+      setSearchTimeout(timeout);
     } else {
       onFilterChange(updatedFilters);
     }
   };
 
   const handleClearFilters = async () => {
+    // Clear any pending search timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    setLocalSearchQuery(''); // Clear local search query
     onFilterChange(defaultFilters);
     await fetchEvents(defaultFilters);
   };
+
+  // Cleanup timeout on component unmount
+  React.useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
+  // Update local search query when filters change externally
+  React.useEffect(() => {
+    setLocalSearchQuery(filters.searchQuery || '');
+  }, [filters.searchQuery]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
@@ -106,7 +137,7 @@ export default function EventFilters({ onFilterChange, filters }: EventFiltersPr
                   type="text"
                   name="searchQuery"
                   id="searchQuery"
-                  value={filters.searchQuery}
+                  value={localSearchQuery}
                   onChange={handleChange}
                   placeholder="Search events..."
                   className="block w-full rounded-lg border-gray-300 bg-gray-50 pl-10 
