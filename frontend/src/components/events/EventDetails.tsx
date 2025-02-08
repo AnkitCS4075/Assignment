@@ -162,28 +162,34 @@ export default function EventDetails({ eventId, onClose }: EventDetailsProps) {
 
       {/* Attendees List */}
       <div className="bg-white rounded-lg p-4 sm:p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Attendees</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {event.attendees.map((attendee) => (
-            <div
-              key={attendee._id}
-              className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
-            >
-              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                <span className="text-indigo-600 font-medium">
-                  {attendee.name?.[0] || attendee.email[0].toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {attendee.name || attendee.email}
-                </p>
-                {attendee._id === event.organizer._id && (
-                  <p className="text-xs text-indigo-600">Organizer</p>
-                )}
-              </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">Event Organizer</h3>
+            <span className="text-sm text-gray-500">
+              Total Attendees: {event.attendees.length}
+              {event.maxAttendees && ` / ${event.maxAttendees}`}
+            </span>
+          </div>
+          
+          {/* Organizer Card */}
+          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex-shrink-0 h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
+              <span className="text-lg text-indigo-600 font-medium">
+                {event.organizer.name?.[0] || event.organizer.email[0].toUpperCase()}
+              </span>
             </div>
-          ))}
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold text-gray-900 truncate">
+                {event.organizer.name || event.organizer.email}
+              </p>
+              <p className="text-sm text-indigo-600 font-medium">
+                Organizer
+              </p>
+              <p className="text-sm text-gray-500 truncate">
+                {event.organizer.email}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
