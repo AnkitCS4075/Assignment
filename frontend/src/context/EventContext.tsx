@@ -51,6 +51,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState({});
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -58,7 +59,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     totalPages: 1
   });
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const fetchEvents = useCallback(async (filters = {}) => {
     if (!token) return;
@@ -66,6 +67,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       setError(null);
+      setCurrentFilters(filters);
 
       const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
@@ -151,13 +153,33 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   const joinEvent = async (eventId: string) => {
     try {
-      await axios.post(
+      const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/events/${eventId}/join`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+
+      // Immediately update the local state
+      setEvents(prevEvents => 
+        prevEvents.map(event => {
+          if (event._id === eventId && user) {
+            return {
+              ...event,
+              attendees: [...event.attendees, {
+                _id: user._id,
+                name: user.name,
+                email: user.email
+              }]
+            };
+          }
+          return event;
+        })
+      );
+
+      // Fetch fresh data
+      await fetchEvents(currentFilters);
     } catch (error: any) {
       console.error('Join event error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.error || 'Failed to join event');
@@ -166,13 +188,31 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   const leaveEvent = async (eventId: string) => {
     try {
-      await axios.post(
+      const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/events/${eventId}/leave`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+
+      // Immediately update the local state
+      setEvents(prevEvents => 
+        prevEvents.map(event => {
+          if (event._id === eventId && user) {
+            return {
+              ...event,
+              attendees: event.attendees.filter(
+                attendee => attendee._id !== user._id
+              )
+            };
+          }
+          return event;
+        })
+      );
+
+      // Fetch fresh data
+      await fetchEvents(currentFilters);
     } catch (error: any) {
       console.error('Leave event error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.error || 'Failed to leave event');

@@ -30,7 +30,6 @@ export default function EventDetails({ eventId, onClose }: EventDetailsProps) {
     try {
       setIsJoining(true);
       await joinEvent(eventId);
-      onClose();
     } catch (error) {
       console.error('Failed to join event:', error);
     } finally {
@@ -42,7 +41,6 @@ export default function EventDetails({ eventId, onClose }: EventDetailsProps) {
     try {
       setIsLeaving(true);
       await leaveEvent(eventId);
-      onClose();
     } catch (error) {
       console.error('Failed to leave event:', error);
     } finally {
