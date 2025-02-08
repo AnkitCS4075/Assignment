@@ -258,7 +258,7 @@ export default function EventList() {
                           />
                         </svg>
                         <span className="ml-1.5">
-                          {event.attendees?.length || 0} attendees
+                          {event.attendees?.length || 0}
                         </span>
                       </div>
                     </div>
