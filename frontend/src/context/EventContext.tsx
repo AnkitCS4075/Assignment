@@ -178,8 +178,23 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         })
       );
 
-      // Fetch fresh data
-      await fetchEvents(currentFilters);
+      // Silently fetch fresh data in the background
+      const queryParams = new URLSearchParams();
+      Object.entries(currentFilters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value.toString());
+        }
+      });
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/events?${queryParams.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setEvents(response.data.data);
+      setPagination(response.data.pagination);
     } catch (error: any) {
       console.error('Join event error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.error || 'Failed to join event');
@@ -211,8 +226,23 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         })
       );
 
-      // Fetch fresh data
-      await fetchEvents(currentFilters);
+      // Silently fetch fresh data in the background
+      const queryParams = new URLSearchParams();
+      Object.entries(currentFilters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value.toString());
+        }
+      });
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/events?${queryParams.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setEvents(response.data.data);
+      setPagination(response.data.pagination);
     } catch (error: any) {
       console.error('Leave event error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.error || 'Failed to leave event');
