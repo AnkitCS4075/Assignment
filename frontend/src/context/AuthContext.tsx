@@ -101,8 +101,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(response.data.user);
       return response.data;
     } catch (error: any) {
-      console.error('Guest login error:', error.response?.data || error.message);
-      setError(error.response?.data?.error || 'Guest login failed');
+      const errorMessage = error.response?.data?.error || 'Guest login failed';
+      // If the email is registered with a regular account, suggest logging in
+      if (errorMessage.includes('registered with a regular account')) {
+        setError('This email is already registered. Please login to your account instead.');
+      } else {
+        setError(errorMessage);
+      }
       throw error;
     }
   };

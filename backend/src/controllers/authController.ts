@@ -29,17 +29,40 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    
     if (existingUser) {
+      // If the existing user is a guest, update it to a regular account
+      if (existingUser.isGuest) {
+        existingUser.name = name;
+        existingUser.password = password;
+        existingUser.isGuest = false;
+        await existingUser.save();
+        
+        const token = generateToken(existingUser);
+        res.json({
+          user: {
+            _id: existingUser._id,
+            name: existingUser.name,
+            email: existingUser.email,
+            isGuest: existingUser.isGuest
+          },
+          token
+        });
+        return;
+      }
+      // If it's a regular account, don't allow registration
       res.status(400).json({ error: 'Email already registered' });
       return;
     }
 
-    // Create new user
+    // Create new user if doesn't exist
     const user = new User({
       name,
-      email,
+      email: normalizedEmail,
       password
     });
 
@@ -118,19 +141,36 @@ export const guestLogin = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    // Check if the email already exists
-    const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check if the email exists
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    
     if (existingUser) {
-      res.status(400).json({ error: 'Email already exists. Please use a different email.' });
+      // If user exists but is not a guest, don't allow guest login
+      if (!existingUser.isGuest) {
+        res.status(400).json({ error: 'This email is registered with a regular account. Please login instead.' });
+        return;
+      }
+      // If user exists and is a guest, generate new token and return
+      const token = generateToken(existingUser);
+      res.json({
+        user: {
+          _id: existingUser._id,
+          name: existingUser.name,
+          email: existingUser.email,
+          isGuest: existingUser.isGuest
+        },
+        token
+      });
       return;
     }
 
-    // Generate a random password for the guest user
+    // Create new guest user if doesn't exist
     const randomPassword = Math.random().toString(36).slice(-8);
-
     const user = new User({
       name: 'Guest User',
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
       password: randomPassword,
       isGuest: true
     });
@@ -171,5 +211,52 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
     });
   } catch (error) {
     res.status(400).json({ error: 'Failed to get profile' });
+  }
+};
+
+export const convertGuest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, email, password } = req.body;
+    const userId = (req as AuthRequest).user?._id;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    // Validate password length
+    if (!password || password.length < 6) {
+      res.status(400).json({ error: 'Password must be at least 6 characters long' });
+      return;
+    }
+
+    // Find and update the guest user
+    const user = await User.findById(userId);
+    
+    if (!user || !user.isGuest) {
+      res.status(400).json({ error: 'Only guest accounts can be converted' });
+      return;
+    }
+
+    // Update user information
+    user.name = name;
+    user.password = password;
+    user.isGuest = false;
+
+    await user.save();
+    const token = generateToken(user);
+
+    res.json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isGuest: user.isGuest
+      },
+      token
+    });
+  } catch (error) {
+    console.error('Convert guest error:', error);
+    res.status(400).json({ error: 'Failed to convert guest account' });
   }
 }; 
