@@ -153,7 +153,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   const joinEvent = async (eventId: string) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_URL}/api/events/${eventId}/join`,
         {},
         {
@@ -188,7 +188,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   const leaveEvent = async (eventId: string) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_URL}/api/events/${eventId}/leave`,
         {},
         {

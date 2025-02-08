@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { EventFilters as FilterTypes } from '../../types/event';
 import { useEvents } from '../../context/EventContext';
 
@@ -10,7 +10,7 @@ interface EventFiltersProps {
 export default function EventFilters({ onFilterChange, filters }: EventFiltersProps) {
   const { fetchEvents } = useEvents();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [localSearchQuery, setLocalSearchQuery] = useState(filters.searchQuery || '');
   
   const categories = [
